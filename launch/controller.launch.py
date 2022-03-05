@@ -28,11 +28,20 @@ def generate_launch_description():
         'angular_max', default_value=TextSubstitution(text='0.7') #[rad/s]
     )
 
+    linear_t_launch_arg = DeclareLaunchArgument(
+        'linear_t_max', default_value=TextSubstitution(text='0.35')  # [m/s]
+    )
+    angular_t_launch_arg = DeclareLaunchArgument(
+        'angular_t_max', default_value=TextSubstitution(text='1.4') #[rad/s]
+    )
+
     return LaunchDescription([
         ip_launch_arg,
         port_launch_arg,
         linear_launch_arg,
         angular_launch_arg,
+        linear_t_launch_arg,
+        angular_t_launch_arg,
         Node(
             package='ros_tcp_endpoint',
             executable='default_server_endpoint',
@@ -46,9 +55,10 @@ def generate_launch_description():
         Node(
             package='teleop_twist_joy',
             executable='teleop_node',
-            remappings=[('joy', '/android/joy')],
+            remappings=[('joy', '/android/joy'), ('cmd_vel', '/cmd_vel')],
             parameters=[
                 {'require_enable_button':   True},
+                {'enable_turbo_button':     1},
                 {'enable_button':           0},
                 {'axis_linear.x':           1},
                 {'axis_linear.y':           0},
@@ -56,6 +66,9 @@ def generate_launch_description():
                 {'scale_linear.x':          LaunchConfiguration('linear_max')},
                 {'scale_linear.y':          ['-', LaunchConfiguration('linear_max')]},
                 {'scale_angular.yaw':       ['-', LaunchConfiguration('angular_max')]},
+                {'scale_linear_turbo.x':    LaunchConfiguration('linear_t_max')},
+                {'scale_linear_turbo.y':          ['-', LaunchConfiguration('linear_t_max')]},
+                {'scale_angular_turbo.yaw':       ['-', LaunchConfiguration('angular_t_max')]}
             ],
         )
     ])
